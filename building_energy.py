@@ -19,7 +19,6 @@ def main():
 
     for i in range(77):
         building_values.append(scrape_building(driver))
-        print(building_values)
 
     write_to_csv(building_values)
 
