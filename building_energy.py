@@ -12,14 +12,16 @@ from datetime import datetime, timezone, timedelta
 
 def main():
     driver = set_up()
+    building_values = []
 
     driver.get("https://energy.uwo.ca/enteliweb/earthright#/campus")
     tm.sleep(5)  # Wait for page to load
     driver.find_element(By.XPATH, '/html/body/div[1]/div/div[2]/ui-view/navigation/header/nav/ul/li[2]').click()
 
     for i in range(77):
-        building_values = scrape_building(driver)
-        write_to_csv(building_values)
+        building_values.append(scrape_building(driver))
+
+    write_to_csv(building_values)
 
 
 def scrape_building(driver):
@@ -39,8 +41,6 @@ def scrape_building(driver):
 
     # Click on top result
     driver.find_element(By.XPATH, '/html/body/div[1]/div/div[2]/ui-view/div/section/article[2]/div[1]/div[1]').click()
-
-    print(building)
 
     return building
 
@@ -151,13 +151,14 @@ def write_to_csv(building_values):
     """
     Writes the date, time, electricity and water usage to a CSV file.
     """
-    print("csv: ", building_values)
-    name, electricity, steam, water = building_values
-    now_date, now_time = create_time()
-    row = [now_date, now_time, name, electricity, steam, water]
-    with open('building_data.csv', 'a') as f:
-        writer = csv.writer(f)
-        writer.writerow(row)
+    for building in building_values:
+        name, electricity, steam, water = building
+        csv_name = name.replace(" ", "") + ".csv"
+        now_date, now_time = create_time()
+        row = [now_date, now_time, electricity, steam, water]
+        with open("./csv_files/" + csv_name, 'a') as f:
+            writer = csv.writer(f)
+            writer.writerow(row)
 
 
 main()
