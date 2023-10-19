@@ -1,7 +1,6 @@
 from bs4 import BeautifulSoup
 from selenium.webdriver.common.by import By
 import time as tm
-import csv
 from lxml import etree
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -20,6 +19,7 @@ def main():
 
     for i in range(77):
         building_values.append(scrape_building(driver))
+        print(building_values)
 
     write_to_csv(building_values)
 
@@ -66,7 +66,6 @@ def get_values(driver):
         electricity = None
 
     if driver.find_elements(By.CSS_SELECTOR, 'gauge-widget[resource-name="TXID_WEB_EARTHRIGHT_STEAM"]'):
-        tm.sleep(2)
         if electricity:
             steam = driver.find_element(By.XPATH, '/html/body/div[1]/div/div[2]/ui-view/div/section/article[1]/ul/li['
                                                   '2]/div/gauge-widget')
@@ -81,7 +80,6 @@ def get_values(driver):
         steam = None
 
     if driver.find_elements(By.CSS_SELECTOR, 'gauge-widget[resource-name="TXID_WEB_EARTHRIGHT_WATER"]'):
-        tm.sleep(2)
 
         if not steam and not electricity:
             water = driver.find_element(By.XPATH, '/html/body/div[1]/div/div[2]/ui-view/div/section/article[1]/ul/li['
@@ -151,14 +149,9 @@ def write_to_csv(building_values):
     """
     Writes the date, time, electricity and water usage to a CSV file.
     """
-    for building in building_values:
-        name, electricity, steam, water = building
-        csv_name = name.replace(" ", "") + ".csv"
-        now_date, now_time = create_time()
-        row = [now_date, now_time, electricity, steam, water]
-        with open("./csv_files/" + csv_name, 'a') as f:
-            writer = csv.writer(f)
-            writer.writerow(row)
+    now_date, now_time = create_time()
+    with open('building_data.txt', 'a') as f:
+        f.write(now_date + " " + now_time + ":" + str(building_values) + ",\n")
 
 
 main()
